@@ -180,7 +180,7 @@ class BuildExtension(build_ext):
             cuda_arch_str = os.getenv("TORCH_CUDA_ARCH_LIST")
             # Convert MAJOR.MINOR[+PTX] list to new style one defined at
             # https://cmake.org/cmake/help/latest/prop_tgt/CUDA_ARCHITECTURES.html
-            cuda_architectures = cuda_arch_str.replace(".", "").split(";")
+            cuda_architectures = cuda_arch_str.replace(".", "").replace(" ", ";").split(";")
             cuda_architectures = [
                 cuda_arch[:-4] if cuda_arch.endswith("+PTX")
                 else f"{cuda_arch}-real"
