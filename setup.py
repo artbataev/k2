@@ -182,11 +182,10 @@ class BuildExtension(build_ext):
             # https://cmake.org/cmake/help/latest/prop_tgt/CUDA_ARCHITECTURES.html
             cuda_architectures = cuda_arch_str.replace(".", "").replace(" ", ";").split(";")
             cuda_architectures = [
-                cuda_arch[:-4] if cuda_arch.endswith("+PTX")
-                else f"{cuda_arch}-real"
+                cuda_arch[:-4] if cuda_arch.endswith("+PTX") else cuda_arch
                 for cuda_arch in cuda_architectures
             ]
-            cmake_args += f" -DCMAKE_CUDA_ARCHITECTURES=\"{';'.join(cuda_architectures)}\""
+            cmake_args += f" -DK2_COMPUTE_ARCH_CANDIDATES=\"{' '.join(cuda_architectures)}\""
 
         cmake_args += extra_cmake_args
 

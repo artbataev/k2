@@ -227,18 +227,26 @@ if(K2_WITH_CUDA)
 
   # see https://arnon.dk/matching-sm-architectures-arch-and-gencode-for-various-nvidia-cards/
   # https://www.myzhar.com/blog/tutorials/tutorial-nvidia-gpu-cuda-compute-capability/
-  set(K2_COMPUTE_ARCH_CANDIDATES 35 50 60 61 70 75)
-  if(CUDA_VERSION VERSION_GREATER "11.0")
+  if(NOT DEFINED K2_COMPUTE_ARCH_CANDIDATES)
+    set(K2_COMPUTE_ARCH_CANDIDATES 35 50 60 61 70 75)
+    if(CUDA_VERSION VERSION_GREATER "11.0")
       list(APPEND K2_COMPUTE_ARCH_CANDIDATES 80 86)
-      if(WIN32)
-        # To fix the following warning from PyTorch:
-        # c10/util/TypeCast.h(39): warning : calling a constexpr __host__ function from a
-        # __host__ __device__ function is not allowed. The experimental flag '--expt-relaxed-constexpr'
-        # can be used to allow this
-        string(APPEND CMAKE_CUDA_FLAGS " --expt-relaxed-constexpr ")
-      endif()
+    endif()
+    if(CUDA_VERSION VERSION_GREATER "12.0")
+      list(APPEND K2_COMPUTE_ARCH_CANDIDATES 90)
+    endif()
+  endif()
 
-      string(APPEND CMAKE_CUDA_FLAGS " -Wno-deprecated-gpu-targets ")
+  if(CUDA_VERSION VERSION_GREATER "11.0")
+    if(WIN32)
+      # To fix the following warning from PyTorch:
+      # c10/util/TypeCast.h(39): warning : calling a constexpr __host__ function from a
+      # __host__ __device__ function is not allowed. The experimental flag '--expt-relaxed-constexpr'
+      # can be used to allow this
+      string(APPEND CMAKE_CUDA_FLAGS " --expt-relaxed-constexpr ")
+    endif()
+
+    string(APPEND CMAKE_CUDA_FLAGS " -Wno-deprecated-gpu-targets ")
   endif()
   message(STATUS "K2_COMPUTE_ARCH_CANDIDATES ${K2_COMPUTE_ARCH_CANDIDATES}")
 
