@@ -172,6 +172,22 @@ class BuildExtension(build_ext):
             print(f"Setting PYTHON_EXECUTABLE to {sys.executable}")
             cmake_args += f" -DPYTHON_EXECUTABLE={sys.executable}"
 
+        if "K2_WITH_CUDA=OFF" not in cmake_args and os.getenv(
+                "TORCH_CUDA_ARCH_LIST") is not None:
+            # add Cuda arch list to CMake args based on TORCH_CUDA_ARCH_LIST env
+            # variable similar to TorchAudio
+            # https://github.com/pytorch/audio/commit/8cbd56c2714f7747262255870e8b825b7c445fc9
+            cuda_arch_str = os.getenv("TORCH_CUDA_ARCH_LIST")
+            # Convert MAJOR.MINOR[+PTX] list to new style one defined at
+            # https://cmake.org/cmake/help/latest/prop_tgt/CUDA_ARCHITECTURES.html
+            cuda_architectures = cuda_arch_str.replace(".", "").split(";")
+            cuda_architectures = [
+                cuda_arch[:-4] if cuda_arch.endswith("+PTX")
+                else f"{cuda_arch}-real"
+                for cuda_arch in cuda_architectures
+            ]
+            cmake_args += f" -DCMAKE_CUDA_ARCHITECTURES={';'.join(cuda_architectures)}"
+
         cmake_args += extra_cmake_args
 
         if is_windows():
